@@ -10,7 +10,7 @@ angular.module('ionicApp', ['ionic'])
     })
 
     .state('tabs.home', {
-      url: "/home",
+      url: "/home", //:LatLng",
       views: {
         'home-tab': {
           templateUrl: "templates/home.html",
@@ -19,7 +19,7 @@ angular.module('ionicApp', ['ionic'])
       }
     })
     .state('tabs.maps', {
-      url: "/maps",
+      url: "/maps",//:LatLng",
       views: {
         'home-tab': {
           templateUrl: "templates/maps.html",
@@ -27,8 +27,8 @@ angular.module('ionicApp', ['ionic'])
         }
       }
     })
-    .state('tabs.facts2', {
-      url: "/facts2",
+    .state('tabs.facts2/', {
+      url: "/facts2", //:LatLng",
       views: {
         'home-tab': {
           templateUrl: "templates/facts2.html"
@@ -69,7 +69,9 @@ angular.module('ionicApp', ['ionic'])
   console.log('HomeTabCtrl');
 })
 
-.controller('MapCtrl', function($scope, $ionicLoading, $compile) {
+.controller('MapCtrl', function($scope, $ionicLoading, $compile, $stateParams) {
+
+  //var LatLng = $stateProvider.LatLng;
       function initialize() {
         var myLatlng = new google.maps.LatLng(49.840221, 24.017666);
         
@@ -101,8 +103,8 @@ angular.module('ionicApp', ['ionic'])
 
         $scope.map = map;
       }
-      google.maps.event.addDomListener(window, 'load', initialize);
-      
+      //google.maps.event.addDomListener(window, 'load', initialize);
+      initialize();
       $scope.centerOnMe = function() {
         if(!$scope.map) {
           return;
@@ -125,7 +127,9 @@ angular.module('ionicApp', ['ionic'])
         alert('Example of infowindow with ng-click')
       };
 
-      console.log('HomeTabCtrl1');
-      
+      //$scope.clickHome = function() {
+        //$state("home-tab", {LatLng: $scope.LatLng});
+    
+      //}
     });
 
