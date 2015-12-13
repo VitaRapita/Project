@@ -28,14 +28,28 @@
     <script id="templates/maps.html" type="text/ng-template">
 
       <ion-header-bar class="bar-dark" >
-      <h1 class="title">Map</h1>
-    </ion-header-bar>
-    <ion-content ng-controller = 'MapCtrl'>
-      <div id="map" data-tap-disabled="true"></div>
-    </ion-content>
-    <ion-footer-bar class="bar-dark">
-      <a ng-click="centerOnMe()" class="button button-icon icon ion-navigate">Find Me</a>
-    </ion-footer-bar>
+      </ion-header-bar>
+
+      <ion-content ng-controller = 'MapCtrl'>
+        <a class="button icon icon-right ion-chevron-right" href="#/tab/parking">Next page</a>
+        <div id="map" data-tap-disabled="true"></div>
+      </ion-content>
+      <ion-footer-bar class="bar-dark">
+        <a ng-click="centerOnMe()" class="button button-icon icon ion-navigate">Find Me</a>
+      </ion-footer-bar>
+    </script>
+
+    <script id="templates/parking.html" type="text/ng-template">
+
+      <ion-header-bar class="bar-dark" >
+        <h1 class="title">Parking</h1>
+      </ion-header-bar>
+      <ion-content ng-controller = 'ParkCtrl'>
+        <div id="map" data-tap-disabled="true"></div>
+      </ion-content>
+      <ion-footer-bar class="bar-dark">
+        
+      </ion-footer-bar>
     </script>
 
     <script id="templates/tabs.html" type="text/ng-template">
