@@ -128,6 +128,12 @@ angular.module('ionicApp', ['ionic'])
         navigator.geolocation.getCurrentPosition(function (pos) {
           $scope.map.setCenter(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
           $scope.loading.hide();
+          /*var myLocation = new google.maps.Marker({
+            position: new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude),
+            map: map,
+            title: "My Location"
+          });*/
+
         }, function (error) {
           alert('Unable to get location: ' + error.message);
         });
@@ -144,9 +150,19 @@ angular.module('ionicApp', ['ionic'])
     })
 
 
-    .controller('ParkCtrl', function ($scope, $ionicLoading, $compile) {
+    .controller('ParkCtrl', function ($scope, $ionicLoading, $compile, $stateParams) {
 
-      google.maps.event.addDomListener(window, 'load', function () {
+      function initialize() {
+        var myLatlng = new google.maps.LatLng(49.840221, 24.017666);
+
+        var mapOptions = {
+          center: myLatlng,
+          zoom: 16,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        var map = new google.maps.Map(document.getElementById("map"),
+            mapOptions);
+        /*google.maps.event.addDomListener(window, 'load', function () {
         var myLatlng = new google.maps.LatLng(49.839683, 24.029717);
 
         var mapOptions = {
@@ -155,8 +171,13 @@ angular.module('ionicApp', ['ionic'])
           mapTypeId: google.maps.MapTypeId.ROADMAP
         };
 
-        var map = new google.maps.Map(document.getElementById("map"), mapOptions);
-
+        var map = new google.maps.Map(document.getElementById("map"), mapOptions);*/
+        $scope.loading = $ionicLoading.show({
+          content: 'Getting current location...',
+          showBackdrop: false
+        }); //очікування завантаженя карти
+      
+    
         navigator.geolocation.getCurrentPosition(function (pos) {
           map.setCenter(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
           var myLocation = new google.maps.Marker({
@@ -164,7 +185,9 @@ angular.module('ionicApp', ['ionic'])
             map: map,
             title: "My Location"
           });
+          $scope.loading.hide(); //карту завантажено, ховаємо очікування
         });
+
 
         $scope.map = map;
         /*var image = 'images.jpg'
@@ -175,7 +198,7 @@ angular.module('ionicApp', ['ionic'])
          icon: image
 
          })*/
-
+      
         var markers = [  // Точки, в яких будемо ставити позначки
           {
             "title": 'вул. Валова', // Назва (підказка, що випливає при наведенні курсора миші)
@@ -299,6 +322,8 @@ angular.module('ionicApp', ['ionic'])
           },
 
         ];
+
+
         var latlngbounds = new google.maps.LatLngBounds();
         var infoWindow = new google.maps.InfoWindow();
         for (var i = 0; i < markers.length; i++) {
@@ -327,5 +352,7 @@ angular.module('ionicApp', ['ionic'])
           }
         }
 
-      });
+      };
+      initialize();
+
     });
