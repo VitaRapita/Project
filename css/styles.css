@@ -1,0 +1,37 @@
+#map {
+  height: 100%;
+}
+
+.home-content {
+  color: #ffffff;
+  text-align: center;
+  background: url("../images/home-bg.jpg") no-repeat center center;
+  -webkit-background-size: cover;
+  background-size: cover;
+  text-shadow: .1em .2em .2em rgba(0,0,0,.5);
+}
+
+.home-content h1 {
+  font-weight: bold;
+  color: #ffffff;
+  font-size: 3.5em;
+  line-height: 1;
+  margin: 2em 0 .5em;
+}
+
+.home-content p {
+  font-size: 1.5em;
+  line-height: 1.5em;
+}
+
+@media screen and (orientation: landscape) {
+  .home-content h1 {
+    margin-top: .5em;
+  }
+}
+
+/* Override ionic styles */
+.pane .scroll-content,
+.menu .scroll-content {
+  overflow-y: auto;
+}
