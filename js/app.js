@@ -7,7 +7,7 @@ App.module.config(function ($stateProvider, $urlRouterProvider) {
       .state('parkingmenu', {
         url: "",
         abstract: true,
-        templateUrl: "templates/event-menu.html"
+        templateUrl: "templates/menu.html"
       })
       .state('parkingmenu.home', {
         url: "/home",
@@ -31,7 +31,7 @@ App.module.config(function ($stateProvider, $urlRouterProvider) {
         views: {
           'menuContent': {
             templateUrl: "templates/map.html",
-            controller: "MapViewCtrl"
+            controller: "MapViewCtrl",
           }
         }
       })
@@ -61,7 +61,7 @@ App.module.controller('ListViewCtrl', function ($scope) {
   // Add some useful staff later
 });
 
-App.module.controller('MapViewCtrl', function ($scope) {
+App.module.controller('MapViewCtrl', function ($scope, $ionicLoading) {
   var GMaps = google.maps;
   var userCoordinates = {
     lat: App.defaults.lat,
@@ -97,21 +97,27 @@ App.module.controller('MapViewCtrl', function ($scope) {
   $scope.map = map;
   placeParkings();
 
+  function getIcon(param) {
+    if (param < 15) {
+      return App.defaults.icons.danger;
+    }
+    else if (param < 25) {
+      return App.defaults.icons.warning;
+    }
+
+    return App.defaults.icons.success;
+  }
+
   function placeParkings() {
-    var latlngBounds = new GMaps.LatLngBounds();
-    var infoWindow = new GMaps.InfoWindow();
-    var markers = $scope.markers;
+    var latlngBounds = new GMaps.LatLngBounds(),
+        infoWindow = new GMaps.InfoWindow(),
+        markers = $scope.markers,
+        image, parkingPosition;
 
     angular.forEach(markers, function(data) {
-      var image = App.defaults.icons.success;
-      if (data.countPlaces < 15) {
-        image = App.defaults.icons.danger;
-      }
-      else if (data.countPlaces < 25) {
-        image = App.defaults.icons.warning;
-      }
+      image = getIcon(data.countPlaces);
 
-      var parkingPosition = new GMaps.LatLng(data.lat, data.lng); // Створюємо об’єкт - точка на мапі
+      parkingPosition = new GMaps.LatLng(data.lat, data.lng); // Створюємо об’єкт - точка на мапі
 
       if (data.mark) { // Якщо потрібно - встановлюємо маркер (позначку)
         var marker = new GMaps.Marker({
@@ -132,6 +138,105 @@ App.module.controller('MapViewCtrl', function ($scope) {
       if (data.forpath) { // Якщо точка має брати участь в прокладені маршруту, зберігаємо її в масиві lat_lng
         lat_lng.push(new GMaps.LatLng(data.lat, data.lng));
       }
+    });
+  }
+
+  $scope.centerOnMe = function() {
+    if(!$scope.map) {
+      return;
+    }
+
+    $scope.loading = $ionicLoading.show({
+      content: 'Getting current location...',
+      showBackdrop: false
+    });
+
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      $scope.map.setCenter(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
+      $ionicLoading.hide();
+    }, function(error) {
+      console.log('Unable to get location: ' + error.message);
+    });
+  };
+
+  // Create the search box and link it to the UI element.
+
+  $scope.search = function () {
+    google.maps.event.addListenerOnce($scope.map, 'idle', function () {
+      debugger;
+      var marker = new google.maps.Marker({
+        map: $scope.map,
+        animation: google.maps.Animation.DROP,
+        position: latLng
+      });
+    });
+
+    var input = document.getElementById('pac-input');
+    var searchBox = new google.maps.places.SearchBox(input);
+    $scope.map.controls.push(input);
+
+    $scope.map.addListener('bounds_changed', function () {
+      searchBox.setBounds($scope.map.getBounds());
+    });
+    var bounds = new google.maps.LatLngBounds();
+
+    searchBox.addListener('places_changed', function () {
+      debugger;
+      var places = searchBox.getPlaces();
+
+      if (places.length == 0) {
+        return;
+      } else {
+        infowindow = new google.maps.InfoWindow();
+        var service = new google.maps.places.PlacesService($scope.map);
+        var request = {
+          location: latLng,
+          radius: 500,
+          types: [places.types]
+        };
+
+        service.nearbySearch(request, callback);
+        $scope.map.fitBounds(bounds);
+      };
+    });
+  };
+
+  function callback(results, status) {
+    if (status == google.maps.places.PlacesServiceStatus.OK) {
+      console.log(results);
+    }
+
+    for (var i = 0; i < results.length; i++) {
+      createMarker(results[i]);
+    }
+  };
+
+  function createMarker(place) {
+    var icon = {
+      url: place.icon,
+      size: new google.maps.Size(71, 71),
+      origin: new google.maps.Point(0, 0),
+      anchor: new google.maps.Point(17, 34),
+      scaledSize: new google.maps.Size(25, 25)
+    };
+
+    var placeLoc = place.geometry.location;
+    markers.push(new google.maps.Marker({
+      map: $scope.map,
+      icon: icon,
+      position: place.geometry.location
+    }));
+
+    if (place.geometry.viewport) {
+      // Only geocodes have viewport.
+      bounds.union(place.geometry.viewport);
+    } else {
+      bounds.extend(place.geometry.location);
+    }
+
+    google.maps.event.addListener(markers, 'click', function () {
+      infowindow.setContent(place.name);
+      infowindow.open($scope.map, this);
     });
   }
 });
