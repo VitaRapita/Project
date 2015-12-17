@@ -152,7 +152,7 @@ App.module.controller('MapViewCtrl', function ($scope, $ionicLoading) {
     });
 
     navigator.geolocation.getCurrentPosition(function(pos) {
-      $scope.map.setCenter(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
+      $scope.map.setCenter(new GMaps.LatLng(pos.coords.latitude, pos.coords.longitude));
       $ionicLoading.hide();
     }, function(error) {
       console.log('Unable to get location: ' + error.message);
@@ -160,85 +160,64 @@ App.module.controller('MapViewCtrl', function ($scope, $ionicLoading) {
   };
 
   // Create the search box and link it to the UI element.
+  $scope.search = function() {
+    var map = $scope.map;
 
-  $scope.search = function () {
-    google.maps.event.addListenerOnce($scope.map, 'idle', function () {
-      debugger;
-      var marker = new google.maps.Marker({
-        map: $scope.map,
-        animation: google.maps.Animation.DROP,
-        position: latLng
-      });
-    });
-
+    // Create the search box and link it to the UI element.
     var input = document.getElementById('pac-input');
     var searchBox = new google.maps.places.SearchBox(input);
-    $scope.map.controls.push(input);
 
-    $scope.map.addListener('bounds_changed', function () {
-      searchBox.setBounds($scope.map.getBounds());
+    // Bias the SearchBox results towards current map's viewport.
+    map.addListener('bounds_changed', function() {
+      searchBox.setBounds(map.getBounds());
     });
-    var bounds = new google.maps.LatLngBounds();
 
-    searchBox.addListener('places_changed', function () {
-      debugger;
+    var markers = [];
+    // Listen for the event fired when the user selects a prediction and retrieve
+    // more details for that place.
+    searchBox.addListener('places_changed', function() {
       var places = searchBox.getPlaces();
 
       if (places.length == 0) {
         return;
-      } else {
-        infowindow = new google.maps.InfoWindow();
-        var service = new google.maps.places.PlacesService($scope.map);
-        var request = {
-          location: latLng,
-          radius: 500,
-          types: [places.types]
+      }
+
+      // Clear out the old markers.
+      angular.forEach(markers, function(marker) {
+        marker.setMap(null);
+      });
+      markers = [];
+
+      // For each place, get the icon, name and location.
+      var bounds = new google.maps.LatLngBounds();
+      angular.forEach(places, function(place) {
+        var icon = {
+          url: place.icon,
+          size: new google.maps.Size(71, 71),
+          origin: new google.maps.Point(0, 0),
+          anchor: new google.maps.Point(17, 34),
+          scaledSize: new google.maps.Size(25, 25)
         };
 
-        service.nearbySearch(request, callback);
-        $scope.map.fitBounds(bounds);
-      };
+        // Create a marker for each place.
+        markers.push(new google.maps.Marker({
+          map: map,
+          icon: icon,
+          title: place.name,
+          position: place.geometry.location
+        }));
+
+        if (place.geometry.viewport) {
+          // Only geocodes have viewport.
+          bounds.union(place.geometry.viewport);
+        } else {
+          bounds.extend(place.geometry.location);
+        }
+      });
+      map.fitBounds(bounds);
     });
   };
 
-  function callback(results, status) {
-    if (status == google.maps.places.PlacesServiceStatus.OK) {
-      console.log(results);
-    }
-
-    for (var i = 0; i < results.length; i++) {
-      createMarker(results[i]);
-    }
-  };
-
-  function createMarker(place) {
-    var icon = {
-      url: place.icon,
-      size: new google.maps.Size(71, 71),
-      origin: new google.maps.Point(0, 0),
-      anchor: new google.maps.Point(17, 34),
-      scaledSize: new google.maps.Size(25, 25)
-    };
-
-    var placeLoc = place.geometry.location;
-    markers.push(new google.maps.Marker({
-      map: $scope.map,
-      icon: icon,
-      position: place.geometry.location
-    }));
-
-    if (place.geometry.viewport) {
-      // Only geocodes have viewport.
-      bounds.union(place.geometry.viewport);
-    } else {
-      bounds.extend(place.geometry.location);
-    }
-
-    google.maps.event.addListener(markers, 'click', function () {
-      infowindow.setContent(place.name);
-      infowindow.open($scope.map, this);
-    });
-  }
 });
 
 App.module.controller('AboutViewCtrl', function($scope) {

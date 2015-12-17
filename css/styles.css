@@ -24,6 +24,14 @@
   line-height: 1.5em;
 }
 
+.has-subheader.has-search {
+  top: 98px;
+}
+
+input.controls {
+  width: 100%;
+}
+
 @media screen and (orientation: landscape) {
   .home-content h1 {
     margin-top: .5em;
