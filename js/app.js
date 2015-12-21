@@ -62,6 +62,11 @@ App.module.controller('ListViewCtrl', function ($scope) {
 });
 
 App.module.controller('MapViewCtrl', function ($scope, $ionicLoading) {
+  $scope.type = {
+    car: false,
+    bicycle: false
+  };
+
   var GMaps = google.maps;
   var userCoordinates = {
     lat: App.defaults.lat,
@@ -90,22 +95,15 @@ App.module.controller('MapViewCtrl', function ($scope, $ionicLoading) {
       map: map,
       title: "You are here",
       mark: true,
-      icon: App.defaults.icons.info
+      icon: getIcon('user')
     });
   });
 
   $scope.map = map;
   placeParkings();
 
-  function getIcon(param) {
-    if (param < 15) {
-      return App.defaults.icons.danger;
-    }
-    else if (param < 25) {
-      return App.defaults.icons.warning;
-    }
-
-    return App.defaults.icons.success;
+  function getIcon(type) {
+    return App.defaults.icons[type];
   }
 
   function placeParkings() {
@@ -114,8 +112,12 @@ App.module.controller('MapViewCtrl', function ($scope, $ionicLoading) {
         markers = $scope.markers,
         image, parkingPosition;
 
+    markers = markers.filter(function(marker) {
+      return $scope.type[marker.type];
+    });
+
     angular.forEach(markers, function(data) {
-      image = getIcon(data.countPlaces);
+      image = getIcon(data.type);
 
       parkingPosition = new GMaps.LatLng(data.lat, data.lng); // Створюємо об’єкт - точка на мапі
 
@@ -126,6 +128,7 @@ App.module.controller('MapViewCtrl', function ($scope, $ionicLoading) {
           draggable: false,
           icon: image
         });
+        $scope.GMarkers.push(marker);
         latlngBounds.extend(marker.position);
         (function (marker, data) {
           GMaps.event.addListener(marker, "click", function (e) {
@@ -140,6 +143,25 @@ App.module.controller('MapViewCtrl', function ($scope, $ionicLoading) {
       }
     });
   }
+
+  $scope.GMarkers = [];
+
+  // Sets the map on all markers in the array.
+  function setMapOnAll(map) {
+    for (var i = 0; i < $scope.GMarkers.length; i++) {
+      $scope.GMarkers[i].setMap(map);
+    }
+  }
+
+// Removes the markers from the map, but keeps them in the array.
+  function clearMarkers() {
+    setMapOnAll(null);
+  }
+
+  $scope.filterParkings = function() {
+    clearMarkers();
+    placeParkings();
+  };
 
   $scope.centerOnMe = function() {
     if(!$scope.map) {
@@ -229,10 +251,9 @@ App.defaults = {
   lng: 24.029717,
   countText: 'Кількість місць: ',
   icons: {
-    info: 'images/infoMarker.png',
-    success: 'images/successMarker.png',
-    warning: 'images/warningMarker.png',
-    danger: 'images/dangerMarker.png'
+    car: 'images/car.png',
+    bicycle: 'images/bicycle.png',
+    user: 'images/user.png'
   }
 };
 
@@ -242,118 +263,135 @@ App.markers = [
     "lat": '49.84000639',
     "lng": '24.03360933',
     "countPlaces": 72,
-    "mark": true
+    "mark": true,
+    "type": 'bicycle'
   },
   {
     "title": 'Пр. Шевченка',
     "lat": '49.8369225',
     "lng": '24.0317838',
     "countPlaces": 46,
-    "mark": true
+    "mark": true,
+    "type": 'car'
   },
   {
     "title": 'Пр. Шевченка',
     "lat": '49.83679448',
     "lng": '24.03156922',
     "countPlaces": 46,
-    "mark": true
+    "mark": true,
+    "type": 'car'
   },
   {
     "title": 'вул. Театральна',
     "lat": '49.84280933',
     "lng": '24.02875727',
     "countPlaces": 21,
-    "mark": true
+    "mark": true,
+    "type": 'car'
   },
   {
     "title": 'вул. Вірменська',
     "lat": '49.84286468',
     "lng": '24.02820474',
     "countPlaces": 21,
-    "mark": true
+    "mark": true,
+    "type": 'car'
   },
   {
     "title": 'вул. Низький Замок',
     "lat": '49.84330057',
     "lng": '24.02792579',
     "countPlaces": 22,
-    "mark": true
+    "mark": true,
+    "type": 'bicycle'
   },
   {
     "title": 'вул. Лесі Українки',
     "lat": '49.84383331',
     "lng": '24.02827984',
     "countPlaces": 21,
-    "mark": true
+    "mark": true,
+    "type": 'car'
   },
   {
     "title": 'вул. Січових Стрільців',
     "lat": '49.84059962',
     "lng": '24.02464312',
     "countPlaces": 40,
-    "mark": true
+    "mark": true,
+    "type": 'car'
   },
   {
     "title": 'вул. Костюшка',
     "lat": '49.84049929',
     "lng": '24.02326983',
     "countPlaces": 30,
-    "mark": true
+    "mark": true,
+    "type": 'car'
   },
   {
     "title": 'вул. Гнатюка',
     "lat": '49.84181638',
     "lng": '24.02388078',
     "countPlaces": 30,
-    "mark": true
+    "mark": true,
+    "type": 'car'
   },
   {
     "title": 'вул. Словацького',
     "lat": '49.83786622',
     "lng": '24.02388787',
     "countPlaces": 30,
-    "mark": true
+    "mark": true,
+    "type": 'car'
   },
   {
     "title": 'вул. Коперніка',
     "lat": '49.83595843',
     "lng": '24.0223977',
     "countPlaces": 20,
-    "mark": true
+    "mark": true,
+    "type": 'car'
   },
   {
     "title": 'вул. Саксаганського',
     "lat": '49.83429072',
     "lng": '24.03339475',
     "countPlaces": 21,
-    "mark": true
+    "mark": true,
+    "type": 'car'
   },
   {
     "title": 'вул. Вагова',
     "lat": '49.8452319',
     "lng": '24.02473929',
     "countPlaces": 14,
-    "mark": true
+    "mark": true,
+    "type": 'car'
   },
   {
     "title": 'вул. Руданського',
     "lat": '49.838356',
     "lng": '24.0305378',
     "countPlaces": 15,
-    "mark": true
+    "mark": true,
+    "type": 'car'
   },
   {
     "title": 'вул. Уласа Самчука',
     "lat": '49.82627601',
     "lng": '24.03209779',
     "countPlaces": 14,
-    "mark": true
+    "mark": true,
+    "type": 'car'
   },
   {
     "title": 'Площа Івана Підкови',
     "lat": '49.8413335',
     "lng": '24.0288112',
     "countPlaces": 23,
-    "mark": true
+    "mark": true,
+    "type": 'car'
   }
 ];

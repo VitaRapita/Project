@@ -105,11 +105,11 @@
     <a class="tab-item" ng-click="centerOnMe()">
       <i class="icon ion-android-locate"></i>
     </a>
-    <a class="tab-item">
-      Favorites
+    <a class="tab-item" ng-class="{active: type.bicycle}" ng-click="type.bicycle = !type.bicycle; filterParkings()">
+      <i class="icon ion-android-bicycle"></i>
     </a>
-    <a class="tab-item">
-      Settings
+    <a class="tab-item" ng-class="{active: type.car}" ng-click="type.car = !type.car; filterParkings()">
+      <i class="icon ion-android-car"></i>
     </a>
   </ion-tabs>
 </script>
